@@ -10,17 +10,24 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.experimental.launch
 import pl.myosolutions.musicapp.R
+import pl.myosolutions.musicapp.db.MovieDatabase
+import pl.myosolutions.musicapp.db.MovieRepository
+import pl.myosolutions.musicapp.db.MoviesDataSource
 import pl.myosolutions.musicapp.http.MoviesAPI
+import pl.myosolutions.musicapp.model.Movie
+import pl.myosolutions.musicapp.utils.NetworkUtils.isConnected
 
 
 class MainActivity : AppCompatActivity() {
 
-    private var disposable: Disposable? = null
+    private var compositeDisposable: CompositeDisposable? = null
 
+    private var movieRepository: MovieRepository? = null
 
     private val movieApiSevice by lazy {
         MoviesAPI.MovieService.create()
@@ -31,19 +38,70 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        disposable = movieApiSevice.getMovies(MoviesAPI.API_KEY,1)
+        val movieDatabase = MovieDatabase.getInstance(this)
+        movieRepository = MovieRepository.getInstance(MoviesDataSource.getInstance(movieDatabase.movieDAO()))
+        compositeDisposable = CompositeDisposable()
+
+        loadMovies()
+    }
+
+
+
+
+    private fun loadMovies() {
+        if(isConnected(this)) loadFromExternalServer() else loadFromLocalDb()
+    }
+
+    private fun loadFromLocalDb() {
+
+        val disposable = movieRepository!!.allMovies
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         { result ->
-                            for(movie in result.results)
-                            Log.d("MoviesApp", movie.toString() ) },
+                            propagateResults(result)
+                        },
                         { error ->
                             Log.d("MoviesApp", error.message)
-                            Toast.makeText(this, error.message, Toast.LENGTH_SHORT).show() }
+                            Toast.makeText(this, error.message, Toast.LENGTH_SHORT).show()
+                        }
                 )
 
+        compositeDisposable!!.add(disposable)
 
+
+    }
+
+    private fun loadFromExternalServer() {
+
+        val disposable =  movieApiSevice.getMovies(MoviesAPI.API_KEY,1)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { result ->
+                            insertToDB(result.results)
+                            propagateResults(result.results)
+                        },
+                        { error ->
+                            Log.d("MoviesApp", error.message)
+                            Toast.makeText(this, error.message, Toast.LENGTH_SHORT).show()
+                        }
+                )
+
+        compositeDisposable!!.add(disposable)
+
+
+    }
+
+    private fun insertToDB(results: List<Movie>) {
+        launch{
+            movieRepository!!.deleteAll()
+            movieRepository!!.insertAll(results)
+        }
+    }
+
+    private fun propagateResults(results: List<Movie>) {
+        Log.d("MoviesApp", results.toString())
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -67,6 +125,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        disposable?.dispose()
+        compositeDisposable?.dispose()
     }
 }

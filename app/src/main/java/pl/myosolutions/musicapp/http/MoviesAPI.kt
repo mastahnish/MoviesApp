@@ -1,7 +1,7 @@
 package pl.myosolutions.musicapp.http
 
 import com.google.gson.GsonBuilder
-import io.reactivex.Observable
+import io.reactivex.Flowable
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
@@ -19,7 +19,7 @@ object MoviesAPI {
     interface MovieService {
 
         @GET("/3/movie/now_playing")
-        fun getMovies(@Query("api_key") apiKey: String, @Query("page") page: Int): Observable<MovieResponse>
+        fun getMovies(@Query("api_key") apiKey: String, @Query("page") page: Int): Flowable<MovieResponse>
 
 
         companion object {
