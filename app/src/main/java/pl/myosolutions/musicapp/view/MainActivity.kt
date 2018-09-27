@@ -5,25 +5,45 @@ import android.content.Context
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.SearchView
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.experimental.launch
 import pl.myosolutions.musicapp.R
-import pl.myosolutions.musicapp.http.Repository
+import pl.myosolutions.musicapp.http.MoviesAPI
 
 
 class MainActivity : AppCompatActivity() {
+
+    private var disposable: Disposable? = null
+
+
+    private val movieApiSevice by lazy {
+        MoviesAPI.MovieService.create()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        val repo = Repository()
-        launch{
-            repo.getMovies()
-        }
+        disposable = movieApiSevice.getMovies(MoviesAPI.API_KEY,1)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { result ->
+                            for(movie in result.results)
+                            Log.d("MoviesApp", movie.toString() ) },
+                        { error ->
+                            Log.d("MoviesApp", error.message)
+                            Toast.makeText(this, error.message, Toast.LENGTH_SHORT).show() }
+                )
+
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -44,4 +64,9 @@ class MainActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
+
+    override fun onPause() {
+        super.onPause()
+        disposable?.dispose()
+    }
 }
