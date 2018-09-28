@@ -18,20 +18,23 @@ class Movie{
         @ColumnInfo(name="overview")
         var overview: String?=null
 
-        @ColumnInfo(name="posterPath")
-        var posterPath: String?=null
+        @ColumnInfo(name="poster_path")
+        var poster_path: String?=null
 
-        @ColumnInfo(name="backdropPath")
-        var backdropPath: String?=null
+        @ColumnInfo(name="backdrop_path")
+        var backdrop_path: String?=null
 
         constructor(){}
 
     override fun toString(): String {
         return StringBuilder(title)
-                .append("\n")
+                .append("\n\n")
                 .append(overview)
-                .append(posterPath)
-                .append(backdropPath)
+                .append("\n\n")
+                .append(poster_path)
+                .append("\n\n")
+                .append(backdrop_path)
+                .append("\n\n\n")
                 .toString()
     }
 

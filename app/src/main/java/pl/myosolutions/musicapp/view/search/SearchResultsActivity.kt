@@ -1,4 +1,4 @@
-package pl.myosolutions.musicapp.view
+package pl.myosolutions.musicapp.view.search
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity

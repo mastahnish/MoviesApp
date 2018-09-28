@@ -16,6 +16,10 @@ object MoviesAPI {
     var API_BASE_URL: String = "https://api.themoviedb.org/"
     const val API_KEY: String = "d9eb3dc80a4a233517342f4a6b622e3f"
 
+    private const val IMAGE_DOMAIN: String = "https://image.tmdb.org/t/p"
+    const val POSTER_URL: String = "$IMAGE_DOMAIN/w500/"
+    const val BACKDROP_URL: String = "$IMAGE_DOMAIN/w780"
+
     interface MovieService {
 
         @GET("/3/movie/now_playing")

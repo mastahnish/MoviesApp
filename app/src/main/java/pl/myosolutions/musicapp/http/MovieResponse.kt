@@ -2,11 +2,7 @@ package pl.myosolutions.musicapp.http
 
 import pl.myosolutions.musicapp.model.Movie
 
-data class MovieResponse(val results: List<Movie>): BaseApiResponse()
+data class MovieResponse(val results: List<Movie>, val page: Int, val total_results: Int, val total_pages: Int)
 
-abstract class BaseApiResponse {
-    var status: Int = 0
-    var message: String? = null
-}
 
 
