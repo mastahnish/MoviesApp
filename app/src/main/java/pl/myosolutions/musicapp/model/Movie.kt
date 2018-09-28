@@ -8,8 +8,11 @@ import io.reactivex.annotations.NonNull
 @Entity(tableName = "movies")
 class Movie{
         @NonNull
-        @PrimaryKey(autoGenerate = false)
+        @PrimaryKey(autoGenerate = true)
         @ColumnInfo(name="id")
+        var uuid: Int=0
+
+        @ColumnInfo(name="movie_id")
         var id: Int=0
 
         @ColumnInfo(name="title")
@@ -27,14 +30,18 @@ class Movie{
         constructor(){}
 
     override fun toString(): String {
-        return StringBuilder(title)
-                .append("\n\n")
+        return StringBuilder(uuid)
+                .append("\n")
+                .append(id)
+                .append("\n")
+                .append(title)
+                .append("\n")
                 .append(overview)
-                .append("\n\n")
+                .append("\n")
                 .append(poster_path)
-                .append("\n\n")
+                .append("\n")
                 .append(backdrop_path)
-                .append("\n\n\n")
+                .append("\n\n")
                 .toString()
     }
 

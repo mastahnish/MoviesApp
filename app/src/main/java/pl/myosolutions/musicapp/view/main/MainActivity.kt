@@ -10,14 +10,11 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
-import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import pl.myosolutions.musicapp.R
 import pl.myosolutions.musicapp.db.*
@@ -61,8 +58,12 @@ class MainActivity : AppCompatActivity(), ILoadMore{
         compositeDisposable = CompositeDisposable()
 
         recycler_view.layoutManager = GridLayoutManager(this, 2, GridLayoutManager.VERTICAL,false);
+        adapter = MoviesAdapter(recycler_view, this, movies)
+        recycler_view.adapter = adapter
+        adapter.setLoadMoreListener(this)
 
     }
+
 
 
     //TODO probably move to ViewModel
@@ -77,7 +78,7 @@ class MainActivity : AppCompatActivity(), ILoadMore{
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         { result ->
-                            propagateResults(result)
+                            propagateFirstResults(result)
                         },
                         { error ->
                             Log.d("MoviesApp", error.message)
@@ -99,8 +100,8 @@ class MainActivity : AppCompatActivity(), ILoadMore{
                         { result ->
                             insertToDB(result)
 
-                            if(page>1) appendResults(result.results)
-                            else propagateResults(result.results)
+                            if(page>1) appendResults(page, result.results)
+                            else propagateFirstResults(result.results)
                         },
                         { error ->
                             Log.d("MoviesApp", error.message)
@@ -113,35 +114,39 @@ class MainActivity : AppCompatActivity(), ILoadMore{
 
     }
 
-    private fun appendResults(results: List<Movie>) {
-        movies.addAll(results)
-        adapter.notifyDataSetChanged()
-        adapter.setLoaded()
-    }
 
     private fun insertToDB(response: MovieResponse) {
+        Log.d("MoviesApp", ListInfo(response.page, response.total_results, response.total_pages).toString())
         launch{
             if(response.page==1) {
                 movieRepository!!.deleteAll()
-                listInfoRepository!!.insertInfo(ListInfo(response.page, response.total_pages, response.total_results))
+                listInfoRepository!!.insertInfo(ListInfo(response.page,  response.total_results, response.total_pages))
             }else{
-                listInfoRepository!!.updateInfo(ListInfo(response.page, response.total_pages, response.total_results))
+                listInfoRepository!!.updateInfo(ListInfo(response.page, response.total_results, response.total_pages))
             }
 
             movieRepository!!.insertAll(response.results)
-
         }
     }
 
 
+    private fun appendResults(page: Int, results: List<Movie>) {
+        Log.d("MoviesApp#appendResults", "resultsSize: ${results.size}  moviesSize: ${movies.size}")
 
-    private fun propagateResults(results: List<Movie>) {
-        Log.d("MoviesApp", results.toString())
-        movies = results as MutableList<Movie?>
-        adapter = MoviesAdapter(recycler_view, this, movies)
-        recycler_view.adapter = adapter
-        adapter.setLoadMore(this@MainActivity)
+        movies.removeAt(movies.size-1)
+        adapter.removeLoadingItem()
 
+        movies.addAll(results)
+        adapter.addNewMovies(page)
+
+
+    }
+
+    private fun propagateFirstResults(results: List<Movie>) {
+        Log.d("MoviesApp", "propagateFirstResults: ${results.size}")
+        movies.addAll(results)
+//        adapter.items = movies
+        adapter.notifyDataSetChanged()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -171,28 +176,35 @@ class MainActivity : AppCompatActivity(), ILoadMore{
 
     //TODO probably move to ViewModel
     override fun onLoadMore() {
-        var listInfo: Flowable<ListInfo>? = null
-        launch {
-            listInfo = async(CommonPool) { listInfoRepository!!.listInfo }.await()
+        val disposable =  listInfoRepository!!.listInfo
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { result ->
+                            loadMore(result)
+                        },
+                        { error ->
+                            Log.d("MoviesApp", error.message)
+                            Toast.makeText(this, error.message, Toast.LENGTH_SHORT).show()
+                        }
+                )
 
-        }
-
-        //FIXME!
-        loadMore(listInfo as ListInfo)
+        compositeDisposable!!.add(disposable)
     }
+
 
     //TODO probably move to ViewModel
     private fun loadMore(result: ListInfo) {
-        if(movies!!.size < result!!.total_results!!){
-            movies!!.add(null)
+        Log.d("MoviesApp#appendResults", "moviesSize: ${movies.size} | totalResults: ${result.totalResults}")
+
+        if(movies.size < result.totalResults!!){
+            movies.add(null)
             adapter.notifyItemInserted(movies.size-1)
 
-            launch {
-                loadFromExternalServer(result.page!!)
+            loadFromExternalServer(result.page?.plus(1)!!)
 
-            }
         }else{
-            Toast.makeText(this, "Max data is reached (${result.total_results}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Max data is reached (${result.totalResults}", Toast.LENGTH_SHORT).show()
         }
     }
 

@@ -24,12 +24,12 @@ internal class MovieItemViewHolder(itemView: View) : RecyclerView.ViewHolder(ite
 
 class MoviesAdapter(recyclerView: RecyclerView, var activity: Activity, var items: MutableList<Movie?>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    val VIEW_TYPE_ITEM: Int = 0;
-    val VIEW_TYPE_LOADING: Int = 1;
+    val VIEW_TYPE_ITEM: Int = 0
+    val VIEW_TYPE_LOADING: Int = 1
 
     internal var loadMoreListener: ILoadMore? = null
     internal var isLoading: Boolean = false
-    internal var visibleThreshold = 5
+    internal var visibleThreshold = 1
     internal var lastVisibleItem: Int = 0
     internal var totalItemCount: Int = 0
 
@@ -42,7 +42,7 @@ class MoviesAdapter(recyclerView: RecyclerView, var activity: Activity, var item
 
                 totalItemCount = linearLayoutManager.itemCount
                 lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition()
-                if (!isLoading && totalItemCount <= lastVisibleItem + visibleThreshold){
+                if (!isLoading && totalItemCount <= lastVisibleItem + visibleThreshold) {
                     if (loadMoreListener != null)
                         loadMoreListener!!.onLoadMore()
 
@@ -52,12 +52,11 @@ class MoviesAdapter(recyclerView: RecyclerView, var activity: Activity, var item
         })
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder{
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == VIEW_TYPE_ITEM) {
             val view = LayoutInflater.from(activity).inflate(R.layout.movie_item_layout, parent, false)
             MovieItemViewHolder(view)
-        }
-        else /*if (viewType == VIEW_TYPE_LOADING)*/ {
+        } else /*if (viewType == VIEW_TYPE_LOADING)*/ {
             val view = LayoutInflater.from(activity).inflate(R.layout.loading_layout, parent, false)
             LoadingViewHolder(view)
         }
@@ -65,7 +64,7 @@ class MoviesAdapter(recyclerView: RecyclerView, var activity: Activity, var item
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if(items[position] == null) VIEW_TYPE_LOADING else VIEW_TYPE_ITEM
+        return if (items[position] == null) VIEW_TYPE_LOADING else VIEW_TYPE_ITEM
     }
 
     override fun getItemCount(): Int {
@@ -89,11 +88,25 @@ class MoviesAdapter(recyclerView: RecyclerView, var activity: Activity, var item
     }
 
 
-    fun setLoaded(){
+    fun setLoaded() {
         isLoading = false
     }
 
-    fun setLoadMore(iLoadMore: ILoadMore){
+    fun setLoadMoreListener(iLoadMore: ILoadMore) {
         this.loadMoreListener = iLoadMore
     }
+
+    fun removeLoadingItem() {
+//        items = movies.toMutableList()
+        notifyItemRemoved(items.size)
+        notifyItemRangeChanged(items.size, 20)
+    }
+
+    fun addNewMovies(page: Int/*, movies: List<Movie>*/) {
+//        items = movies.toMutableList()
+        notifyItemRangeInserted(page*items.size, items.size)
+        setLoaded()
+    }
+
+
 }
