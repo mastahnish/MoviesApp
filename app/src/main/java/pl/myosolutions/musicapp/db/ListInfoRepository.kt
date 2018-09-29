@@ -1,7 +1,9 @@
 package pl.myosolutions.musicapp.db
 
-import io.reactivex.Flowable
+import android.arch.lifecycle.LiveData
 import pl.myosolutions.musicapp.model.ListInfo
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 class ListInfoRepository (private val dataSource: IListInfoDataSource): IListInfoDataSource{
 
@@ -15,15 +17,14 @@ class ListInfoRepository (private val dataSource: IListInfoDataSource): IListInf
         }
     }
 
-    override val listInfo: Flowable<ListInfo>
+    val exector: Executor = Executors.newSingleThreadExecutor()
+
+    override val listInfo: LiveData<ListInfo>
         get() = dataSource.listInfo
 
     override fun insertInfo(info: ListInfo) {
-        dataSource.insertInfo(info)
-    }
+        exector.execute {dataSource.insertInfo(info)}
 
-    override fun updateInfo(info: ListInfo) {
-        dataSource.updateInfo(info)
     }
 
     override fun deletInfo() {

@@ -22,10 +22,10 @@ internal class MovieItemViewHolder(itemView: View) : RecyclerView.ViewHolder(ite
     var itemBackground = itemView.item_background
 }
 
-class MoviesAdapter(recyclerView: RecyclerView, var activity: Activity, var items: MutableList<Movie?>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class MoviesAdapter(recyclerView: RecyclerView, var activity: Activity, private var items: List<Movie?>?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    val VIEW_TYPE_ITEM: Int = 0
-    val VIEW_TYPE_LOADING: Int = 1
+    private val VIEW_TYPE_ITEM: Int = 0
+    private val VIEW_TYPE_LOADING: Int = 1
 
     internal var loadMoreListener: ILoadMore? = null
     internal var isLoading: Boolean = false
@@ -64,17 +64,17 @@ class MoviesAdapter(recyclerView: RecyclerView, var activity: Activity, var item
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (items[position] == null) VIEW_TYPE_LOADING else VIEW_TYPE_ITEM
+        return if (items?.get(position) == null) VIEW_TYPE_LOADING else VIEW_TYPE_ITEM
     }
 
     override fun getItemCount(): Int {
-        return items.size
+        return items!!.size
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is MovieItemViewHolder) {
 
-            val item = items[position] as Movie
+            val item = items?.get(position) as Movie
             val url = POSTER_URL + item.poster_path
 
             Glide.with(activity)
@@ -98,13 +98,13 @@ class MoviesAdapter(recyclerView: RecyclerView, var activity: Activity, var item
 
     fun removeLoadingItem() {
 //        items = movies.toMutableList()
-        notifyItemRemoved(items.size)
-        notifyItemRangeChanged(items.size, 20)
+        notifyItemRemoved(items!!.size)
+        notifyItemRangeChanged(items!!.size, 20)
     }
 
     fun addNewMovies(page: Int/*, movies: List<Movie>*/) {
 //        items = movies.toMutableList()
-        notifyItemRangeInserted(page*items.size, items.size)
+        notifyItemRangeInserted(page*items!!.size, items!!.size)
         setLoaded()
     }
 

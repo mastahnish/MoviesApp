@@ -1,8 +1,9 @@
 package pl.myosolutions.musicapp.db
 
-import io.reactivex.Flowable
+import android.arch.lifecycle.LiveData
 import pl.myosolutions.musicapp.model.Movie
-
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 
 class MoviesDataSource(private val movieDAO: MovieDAO): IMoviesDataSource {
@@ -17,16 +18,17 @@ class MoviesDataSource(private val movieDAO: MovieDAO): IMoviesDataSource {
         }
     }
 
+    val executor: Executor = Executors.newSingleThreadExecutor()
 
-    override val allMovies: Flowable<List<Movie>>
+    override val allMovies: LiveData<List<Movie>>
         get() = movieDAO.allMovies
 
-    override fun getMovieById(id: Int): Flowable<Movie> {
+    override fun getMovieById(id: Int): Movie {
         return movieDAO.getMovieById(id)
     }
 
     override fun insertAll(movies: List<Movie>) {
-        movieDAO.insertMovies(movies)
+        executor.execute {  movieDAO.insertMovies(movies) }
     }
 
     override fun deleteAll() {

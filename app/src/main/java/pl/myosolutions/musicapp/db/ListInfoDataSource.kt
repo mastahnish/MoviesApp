@@ -1,5 +1,6 @@
 package pl.myosolutions.musicapp.db
 
+import android.arch.lifecycle.LiveData
 import io.reactivex.Flowable
 import pl.myosolutions.musicapp.model.ListInfo
 
@@ -16,15 +17,11 @@ class ListInfoDataSource (private val listInfoDAO: ListInfoDAO): IListInfoDataSo
         }
     }
 
-    override val listInfo: Flowable<ListInfo>
+    override val listInfo: LiveData<ListInfo>
         get() = listInfoDAO.listInfo
 
     override fun insertInfo(info: ListInfo) {
        listInfoDAO.insertInfo(info)
-    }
-
-    override fun updateInfo(info: ListInfo) {
-       listInfoDAO.updateInfo(info)
     }
 
     override fun deletInfo() {
