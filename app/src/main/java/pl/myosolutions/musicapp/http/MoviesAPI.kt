@@ -18,6 +18,7 @@ object MoviesAPI {
 
     private const val IMAGE_DOMAIN: String = "https://image.tmdb.org/t/p"
     const val POSTER_URL: String = "$IMAGE_DOMAIN/w500/"
+    const val POSTER_THUMBNAIL_URL: String = "$IMAGE_DOMAIN/w185/"
     const val BACKDROP_URL: String = "$IMAGE_DOMAIN/w780"
 
     interface MovieService {

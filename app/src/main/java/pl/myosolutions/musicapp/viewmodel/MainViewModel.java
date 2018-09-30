@@ -4,9 +4,13 @@ import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 
 import java.util.List;
 
@@ -48,6 +52,8 @@ public class MainViewModel extends AndroidViewModel implements ILoadMore {
     }
 
 
+
+
     @Override
     public void onLoadMore() {
 
@@ -58,31 +64,6 @@ public class MainViewModel extends AndroidViewModel implements ILoadMore {
     }
 
     private void loadFromExternalServer(int page) {
-
-       /* movieApiService.getMovies(MoviesAPI.API_KEY, page)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<MovieResponse>() {
-                    @Override
-                    public void onSubscribe(Subscription s) {
-                    }
-
-                    @Override
-                    public void onNext(MovieResponse movieResponse) {
-                        insertToDB(movieResponse);
-                    }
-
-                    @Override
-                    public void onError(Throwable t) {
-                        Log.d("MoviesApp", t.getMessage());
-                        Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });*/
 
         Disposable disposable = movieApiService.getMovies(MoviesAPI.API_KEY, page)
                 .subscribeOn(Schedulers.io())
@@ -106,10 +87,10 @@ public class MainViewModel extends AndroidViewModel implements ILoadMore {
 
 
     private void insertToDB(MovieResponse response) {
-        Log.d("MoviesApp", new ListInfo(response.getPage(), response.getTotal_results(), response.getTotal_pages()).toString());
+        Log.d("MoviesApp", new ListInfo(1, response.getPage(), response.getTotal_results(), response.getTotal_pages()).toString());
 
         if (response != null) {
-            insertInfo(new ListInfo(response.getPage(), response.getTotal_results(), response.getTotal_pages()));
+            insertInfo(new ListInfo(1, response.getPage(), response.getTotal_results(), response.getTotal_pages()));
             insertMovies(response.getResults());
         }
 
@@ -123,14 +104,5 @@ public class MainViewModel extends AndroidViewModel implements ILoadMore {
         movieRepository.insertAll(movies);
 
     }
-
-
-
-     /*      if (page > 1) {
-                appendResults(page, result.results);
-         } else {
-                 propagateFirstResults(result.results);
-         }*/
-
 
 }

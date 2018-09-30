@@ -28,6 +28,6 @@ class ListInfoRepository (private val dataSource: IListInfoDataSource): IListInf
     }
 
     override fun deletInfo() {
-       dataSource.deletInfo()
+        exector.execute{dataSource.deletInfo()}
     }
 }

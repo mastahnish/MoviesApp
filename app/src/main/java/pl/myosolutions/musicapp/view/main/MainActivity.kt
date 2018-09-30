@@ -4,6 +4,7 @@ import android.app.SearchManager
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.GridLayoutManager
@@ -51,32 +52,43 @@ class MainActivity : AppCompatActivity(), ILoadMore {
     private fun setupObserversForViewModel() {
         val moviesObserver = Observer<List<Movie>> { movies ->
 
-            Log.d("MoviesApp#appendResults", "moviesSize: ${moviesData.size} | totalResults: ${listInfo?.totalResults}")
-            if (adapter == null) {
-                moviesData.clear()
-                moviesData.addAll(movies!!.toMutableList())
-                adapter = MoviesAdapter(recycler_view, this@MainActivity, moviesData)
-                recycler_view.adapter = adapter
-                adapter!!.setLoadMoreListener(this@MainActivity)
+            when {
+                adapter == null -> {
 
-            } else if (listInfo?.page!! > 1) {
-                moviesData.removeAt(moviesData.size - 1)
-                adapter!!.removeLoadingItem()
+                    Log.d("MoviesApp", "when 1");
+                    moviesData.clear()
+                    moviesData.addAll(movies!!.toMutableList())
+                    adapter = MoviesAdapter(recycler_view, this@MainActivity, moviesData)
+                    recycler_view.adapter = adapter
+                    adapter!!.setLoadMoreListener(this@MainActivity)
 
-                moviesData.clear()
-                moviesData.addAll(movies!!.toMutableList())
-                adapter!!.addNewMovies(listInfo?.page!!)
-            } else {
-                moviesData.clear()
-                moviesData.addAll(movies!!.toMutableList())
-                adapter!!.notifyDataSetChanged()
+                }
+                listInfo?.page!! > 1 -> {
+                    Log.d("MoviesApp", "when 2");
+                    moviesData.removeAt(moviesData.size - 1)
+                    adapter!!.removeLoadingItem()
+
+                    moviesData.clear()
+                    moviesData.addAll(movies!!.toMutableList())
+                    adapter!!.addNewMovies(listInfo?.page!!)
+                }
+                else -> {
+                    Log.d("MoviesApp", "when else");
+                    moviesData.clear()
+                    moviesData.addAll(movies!!.toMutableList())
+                    adapter!!.notifyDataSetChanged()
+                }
             }
+
+            Log.d("MoviesApp", "moviesList observed \n moviesSize: ${moviesData?.size ?: 0} | totalResults: ${listInfo?.totalResults}")
+
         }
 
         mViewModel.movies.observe(this, moviesObserver)
 
 
         val listInfoObserver = Observer<ListInfo> { info ->
+            Log.d("MoviesApp", "listInfo observed \n ${info.toString()}")
             listInfo = info
         }
 
@@ -95,59 +107,25 @@ class MainActivity : AppCompatActivity(), ILoadMore {
     //TODO probably move to ViewModel
     override fun onLoadMore() {
         loadMore(listInfo!!)
-        /*  val disposable = listInfoRepository!!.listInfo.
-                  .subscribeOn(Schedulers.io())
-                  .observeOn(AndroidSchedulers.mainThread())
-                  .subscribe(
-                          { result ->
-                              //                            loadMore(result)
-                          },
-                          { error ->
-                              Log.d("MoviesApp", error.message)
-                              Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
-                          }
-                  )
-
-          compositeDisposable.add(disposable)*/
     }
 
 
-    //TODO probably move to ViewModel
     private fun loadMore(result: ListInfo) {
-        Log.d("MoviesApp#appendResults", "moviesSize: ${moviesData.size} | totalResults: ${result.totalResults}")
+        Log.d("MoviesApp#loadMore", "current MoviesData Size: ${moviesData.size} | currentPage: ${result.page}")
 
         if (moviesData.size < result.totalResults!!) {
             moviesData.add(null)
             adapter!!.notifyItemInserted(moviesData.size - 1)
 
-            loadMovies(result.page?.plus(1)!!)
+            var newPage = result.page?.plus(1)!!
+            Log.d("MoviesApp#loadMore", "newPage: $newPage")
+
+            loadMovies(newPage)
 
         } else {
-            Toast.makeText(this, "Max data is reached (${result.totalResults}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "That's current repertuar (${result.totalResults} movies)", Toast.LENGTH_SHORT).show()
         }
     }
-
-/*
-    private fun appendResults(page: Int, results: List<Movie>) {
-        Log.d("MoviesApp#appendResults", "resultsSize: ${results.size}  moviesSize: ${R.string.movies.size}")
-
-        movies.removeAt(R.string.movies.size - 1)
-        adapter.removeLoadingItem()
-
-        movies.addAll(results)
-        adapter.addNewMovies(page)
-
-
-    }
-
-    private fun propagateFirstResults(results: List<Movie>) {
-        Log.d("MoviesApp", "propagateFirstResults: ${results.size}")
-       movies.addAll(results)
-//        adapter.items = movies
-        adapter.notifyDataSetChanged()
-    }
-
-*/
 
 
     private fun loadMovies(page: Int) {
@@ -173,5 +151,8 @@ class MainActivity : AppCompatActivity(), ILoadMore {
         return super.onCreateOptionsMenu(menu)
     }
 
-
+    override fun onDestroy() {
+        super.onDestroy()
+        mViewModel.dispose()
+    }
 }

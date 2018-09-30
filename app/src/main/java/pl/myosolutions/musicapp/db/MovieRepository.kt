@@ -32,7 +32,7 @@ class MovieRepository (private val dataSource: IMoviesDataSource): IMoviesDataSo
     }
 
     override fun deleteAll() {
-        dataSource.deleteAll()
+        executor.execute{dataSource.deleteAll()}
     }
 
 

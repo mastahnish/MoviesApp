@@ -38,8 +38,12 @@ class MainViewModelKotlin(application: Application)
         var movieDatabase: MovieDatabase = MovieDatabase.getInstance(context)
         movieRepository = MovieRepository.getInstance(MoviesDataSource.getInstance(movieDatabase.movieDAO()))
         listInfoRepository = ListInfoRepository.getInstance(ListInfoDataSource.getInstance(movieDatabase.listInfoDAO()))
+        movieRepository!!.deleteAll()
+        listInfoRepository!!.deletInfo()
+
         movies = movieRepository!!.allMovies
         listInfo = listInfoRepository!!.listInfo
+
     }
 
     fun loadMovies(page: Int) {
@@ -53,16 +57,7 @@ class MainViewModelKotlin(application: Application)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         { result ->
-
                             insertToDB(result)
-
-/*                            if (page > 1) {
-//                                appendResults(page, result.results)
-                            } else {
-
-//                                propagateFirstResults(result.results)
-                            }*/
-
                         },
                         { error ->
                             Log.d("MoviesApp", error.message)
@@ -77,16 +72,17 @@ class MainViewModelKotlin(application: Application)
 
 
 
-     private fun loadFromLocalDb(): LiveData<List<Movie>> {
-        return movieRepository!!.allMovies
+     private fun loadFromLocalDb(){
+        movies = movieRepository!!.allMovies
+        listInfo = listInfoRepository!!.listInfo
      }
 
 
 
     private fun insertToDB(response: MovieResponse) {
-        Log.d("MoviesApp", ListInfo(response.page, response.total_results, response.total_pages).toString())
+        Log.d("MoviesApp#insertToDB", "movieResponse: $response")
 
-        insertInfo(ListInfo(response.page, response.total_results, response.total_pages))
+        insertInfo(ListInfo(1, response.page, response.total_results, response.total_pages))
         insertMovies(response.results)
     }
 
@@ -99,4 +95,8 @@ class MainViewModelKotlin(application: Application)
 
     }
 
+
+    fun dispose(){
+        compositeDisposable.dispose()
+    }
 }

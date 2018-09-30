@@ -1,17 +1,30 @@
 package pl.myosolutions.musicapp.view.main.list
 
 import android.app.Activity
+import android.graphics.drawable.Drawable
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.Target
 import kotlinx.android.synthetic.main.loading_layout.view.*
 import kotlinx.android.synthetic.main.movie_item_layout.view.*
 import pl.myosolutions.musicapp.R
+import pl.myosolutions.musicapp.http.MoviesAPI.POSTER_THUMBNAIL_URL
 import pl.myosolutions.musicapp.http.MoviesAPI.POSTER_URL
 import pl.myosolutions.musicapp.model.Movie
+import pl.myosolutions.musicapp.view.main.GlideApp
 
 
 internal class LoadingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -76,9 +89,38 @@ class MoviesAdapter(recyclerView: RecyclerView, var activity: Activity, private 
 
             val item = items?.get(position) as Movie
             val url = POSTER_URL + item.poster_path
+            val thumbnail_url = POSTER_THUMBNAIL_URL + item.poster_path
 
-            Glide.with(activity)
+
+            var listener: RequestListener<Drawable> = object : RequestListener<Drawable> {
+                override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+                    return false
+                }
+
+                override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+                    holder.itemBackground.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.broken_image))
+                    return false
+                }
+
+            }
+
+            val thumbnailRequest = Glide.with(activity).load(thumbnail_url)
+
+/*            GlideApp.with(activity)
                     .load(url)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .useAnimationPool(true)
+//                    .listener(listener)
+                    .thumbnail(thumbnailRequest)
+                    .placeholder(android.R.color.darker_gray)
+                    .into(holder.itemBackground)*/
+
+
+            GlideApp.with(activity)
+
+                    .load(url)
+                    .listener(listener)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(holder.itemBackground)
 
         } else if (holder is LoadingViewHolder) {
@@ -104,7 +146,7 @@ class MoviesAdapter(recyclerView: RecyclerView, var activity: Activity, private 
 
     fun addNewMovies(page: Int/*, movies: List<Movie>*/) {
 //        items = movies.toMutableList()
-        notifyItemRangeInserted(page*items!!.size, items!!.size)
+        notifyItemRangeInserted(page * items!!.size, items!!.size)
         setLoaded()
     }
 

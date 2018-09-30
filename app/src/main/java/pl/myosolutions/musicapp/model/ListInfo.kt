@@ -27,7 +27,8 @@ class ListInfo{
 
     constructor(){}
 
-    constructor(page: Int?, total_results: Int?, total_pages: Int?) {
+    constructor(id: Int, page: Int?, total_results: Int?, total_pages: Int?) {
+        this.id = id
         this.page = page
         this.totalResults = total_results
         this.totalPages = total_pages
@@ -36,10 +37,12 @@ class ListInfo{
 
     override fun toString(): String {
         return StringBuilder("\npage: $page")
-                .append("\n")
+                .append(" || ")
                 .append("total_results: $totalResults")
-                .append("\n")
+                .append(" || ")
                 .append("total_pages: $totalPages")
+                .append(" || ")
+                .append("id: $id")
                 .toString()
     }
 
