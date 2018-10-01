@@ -24,7 +24,9 @@ import pl.myosolutions.musicapp.viewmodel.MainViewModelKotlin
 import java.util.*
 
 
-class MainActivity : AppCompatActivity(), ILoadMore {
+class MainActivity : AppCompatActivity(), ILoadMore , MoviesAdapter.MovieClickCallback{
+
+
 
     var moviesData: MutableList<Movie?> = ArrayList()
     var listInfo: ListInfo? = null
@@ -58,7 +60,7 @@ class MainActivity : AppCompatActivity(), ILoadMore {
                     Log.d("MoviesApp", "when 1");
                     moviesData.clear()
                     moviesData.addAll(movies!!.toMutableList())
-                    adapter = MoviesAdapter(recycler_view, this@MainActivity, moviesData)
+                    adapter = MoviesAdapter(recycler_view, this@MainActivity, moviesData, this)
                     recycler_view.adapter = adapter
                     adapter!!.setLoadMoreListener(this@MainActivity)
 
@@ -155,4 +157,9 @@ class MainActivity : AppCompatActivity(), ILoadMore {
         super.onDestroy()
         mViewModel.dispose()
     }
+
+    override fun onClick(movie: Movie) {
+        Log.d("MoviesApp", movie.toString())
+    }
+
 }

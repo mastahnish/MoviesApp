@@ -1,14 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="wrap_content"
 
-    >
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <ImageView
-        android:id="@+id/item_background"
+    <data>
+        <variable
+            name="movie"
+            type="pl.myosolutions.musicapp.model.Movie" />
+        <variable
+            name="callback"
+            type="pl.myosolutions.musicapp.view.main.list.MoviesAdapter.MovieClickCallback" />
+    </data>
+
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:onClick="@{() ->  callback.onClick(movie)}">
 
 
-</android.support.constraint.ConstraintLayout>
+        <ImageView
+            android:id="@+id/item_background"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+
+    </android.support.constraint.ConstraintLayout>
+
+</layout>
