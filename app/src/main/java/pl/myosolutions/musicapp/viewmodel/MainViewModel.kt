@@ -15,10 +15,9 @@ import pl.myosolutions.musicapp.http.MoviesAPI
 import pl.myosolutions.musicapp.model.ListInfo
 import pl.myosolutions.musicapp.model.Movie
 import pl.myosolutions.musicapp.utils.NetworkUtils
-import pl.myosolutions.musicapp.view.main.list.MoviesAdapter
 
 
-class MainViewModelKotlin(application: Application)
+class MainViewModel(application: Application)
     : AndroidViewModel(application) {
 
 

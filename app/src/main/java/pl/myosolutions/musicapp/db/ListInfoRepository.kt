@@ -17,7 +17,7 @@ class ListInfoRepository (private val dataSource: IListInfoDataSource): IListInf
         }
     }
 
-    val exector: Executor = Executors.newSingleThreadExecutor()
+    private val exector: Executor = Executors.newSingleThreadExecutor()
 
     override val listInfo: LiveData<ListInfo>
         get() = dataSource.listInfo

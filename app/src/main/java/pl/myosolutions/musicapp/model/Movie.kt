@@ -45,5 +45,14 @@ class Movie{
                 .toString()
     }
 
+        companion object {
+            fun getEmptyMovie(): Movie{
+                    var movie: Movie = Movie()
+                    movie.overview = "No data"
+                    movie.title = "No such movie"
+                    return movie
+            }
+        }
+
 
 }
