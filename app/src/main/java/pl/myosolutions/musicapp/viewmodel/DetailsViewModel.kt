@@ -25,7 +25,7 @@ class DetailsViewModel(application: Application)
 
 
     init{
-        var movieDatabase: MovieDatabase = MovieDatabase.getInstance(context)
+        val movieDatabase: MovieDatabase = MovieDatabase.getInstance(context)
         movieRepository = MovieRepository.getInstance(MoviesDataSource.getInstance(movieDatabase.movieDAO()))
     }
 
@@ -39,7 +39,6 @@ class DetailsViewModel(application: Application)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         { result ->
-                            Log.d("MoviesApp", "loadMovieFromLocalDb $result")
                             currentMovie?.postValue(result)
                         },
                         { error ->

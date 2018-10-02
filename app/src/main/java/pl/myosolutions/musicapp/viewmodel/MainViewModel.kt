@@ -34,7 +34,7 @@ class MainViewModel(application: Application)
 
 
     init{
-        var movieDatabase: MovieDatabase = MovieDatabase.getInstance(context)
+        val movieDatabase: MovieDatabase = MovieDatabase.getInstance(context)
         movieRepository = MovieRepository.getInstance(MoviesDataSource.getInstance(movieDatabase.movieDAO()))
         listInfoRepository = ListInfoRepository.getInstance(ListInfoDataSource.getInstance(movieDatabase.listInfoDAO()))
         movieRepository.deleteAll()
@@ -79,8 +79,6 @@ class MainViewModel(application: Application)
 
 
     private fun insertToDB(response: MovieResponse) {
-        Log.d("MoviesApp#insertToDB", "movieResponse: $response")
-
         insertInfo(ListInfo(1, response.page, response.total_results, response.total_pages))
         insertMovies(response.results)
     }

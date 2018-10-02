@@ -34,14 +34,14 @@ class SearchViewModel(application: Application)
 
 
     init{
-        var movieDatabase: MovieDatabase = MovieDatabase.getInstance(context)
+        val movieDatabase: MovieDatabase = MovieDatabase.getInstance(application.applicationContext)
         movieRepository = MovieRepository.getInstance(MoviesDataSource.getInstance(movieDatabase.movieDAO()))
         listInfoRepository = ListInfoRepository.getInstance(ListInfoDataSource.getInstance(movieDatabase.listInfoDAO()))
         movieRepository.deleteAll()
         listInfoRepository.deletInfo()
 
-        movies = movieRepository!!.allMovies
-        listInfo = listInfoRepository!!.listInfo
+        movies = movieRepository.allMovies
+        listInfo = listInfoRepository.listInfo
 
     }
 
@@ -83,8 +83,6 @@ class SearchViewModel(application: Application)
 
 
     private fun insertToDB(response: MovieResponse) {
-        Log.d("MoviesApp#insertToDB", "movieResponse: $response")
-
         insertInfo(ListInfo(1, response.page, response.total_results, response.total_pages))
         insertMovies(response.results)
     }

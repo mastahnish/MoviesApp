@@ -48,6 +48,12 @@ class MainFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
     }
 
 
+    private fun initializeRecyclerView() {
+        binding.recyclerView.setHasFixedSize(true)
+        binding.recyclerView.layoutManager = GridLayoutManager(this.context, 2, GridLayoutManager.VERTICAL, false)
+
+    }
+
     private fun setupObserversForViewModel() {
 
         val listInfoObserver = Observer<ListInfo> { info ->
@@ -62,35 +68,13 @@ class MainFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
 
             when {
                 adapter == null -> {
-                    Log.i("MoviesApp", "when 1")
-
-                    moviesData.clear()
-                    newBatch?.toMutableList()?.let { moviesData.addAll(it) }
-
-                    adapter = MoviesAdapter(binding.recyclerView, this.activity, moviesData, this)
-                    binding.recyclerView.adapter = adapter
-                    adapter?.setLoadMoreListener(this@MainFragment)
-
+                    initializeAdapter(newBatch)
                 }
                 listInfo?.page != null && ((listInfo?.page)!! > 1) -> {
-                    Log.i("MoviesApp", "when 2")
-
-                    moviesData.removeAt(moviesData.size - 1)
-
-                    newBatch?.size?.let {
-                        adapter ?. removeLoadingItem (it)
-                        moviesData.clear()
-                        moviesData.addAll(newBatch.toMutableList())
-                        adapter?.addNewMovies(listInfo?.page!!)
-                    }
-
+                    appendNewData(newBatch)
                 }
                 else -> {
-                    Log.i("MoviesApp", "when else")
-                    moviesData.clear()
-                    newBatch?.toMutableList()?.let { moviesData.addAll(it) }
-
-                    adapter?.notifyDataSetChanged()
+                    propagateInitialData(newBatch)
                 }
             }
 
@@ -101,12 +85,34 @@ class MainFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
         mViewModel.movies.observe(this, moviesObserver)
     }
 
+    private fun propagateInitialData(newBatch: List<Movie>?) {
+        moviesData.clear()
+        newBatch?.toMutableList()?.let { moviesData.addAll(it) }
 
-    private fun initializeRecyclerView() {
-        binding.recyclerView.setHasFixedSize(true)
-        binding.recyclerView.layoutManager = GridLayoutManager(this.context, 2, GridLayoutManager.VERTICAL, false)
-
+        adapter?.notifyDataSetChanged()
     }
+
+    private fun initializeAdapter(newBatch: List<Movie>?) {
+        moviesData.clear()
+        newBatch?.toMutableList()?.let { moviesData.addAll(it) }
+
+        adapter = MoviesAdapter(binding.recyclerView, this.activity, moviesData, this)
+        binding.recyclerView.adapter = adapter
+        adapter?.setLoadMoreListener(this@MainFragment)
+    }
+
+    private fun appendNewData(newBatch: List<Movie>?) {
+        moviesData.removeAt(moviesData.size - 1)
+
+        newBatch?.size?.let {
+            adapter ?. removeLoadingItem (it)
+            moviesData.clear()
+            moviesData.addAll(newBatch.toMutableList())
+            adapter?.addNewMovies(listInfo?.page!!)
+        }
+    }
+
+
 
 
     override fun onLoadMore() {
@@ -117,7 +123,6 @@ class MainFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
 
 
     private fun loadMore(result: ListInfo) {
-        Log.d("MoviesApp#loadMore", "current MoviesData Size: ${moviesData.size} | currentPage: ${result.page}")
 
         if (moviesData.size < result.totalResults!!) {
 
@@ -125,9 +130,7 @@ class MainFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
                 moviesData.add(null)
                 adapter?.notifyItemInserted(moviesData.size - 1)
 
-                var newPage = result.page?.plus(1)!!
-                Log.d("MoviesApp#loadMore", "newPage: $newPage")
-
+                val newPage = result.page?.plus(1)!!
                 loadMovies(newPage)
             }
 
@@ -148,7 +151,6 @@ class MainFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
     }
 
     override fun onClick(movie: Movie) {
-        Log.d("MoviesApp", movie.toString())
         (this.activity as MainActivity).showMovie(movie)
     }
 

@@ -30,8 +30,8 @@ class SearchFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
         private val QUERY_TEXT_KEY: String? = "QUERY_TEXT_KEY"
 
         fun getInstance(query: String): SearchFragment {
-            var frag = SearchFragment()
-            var args = Bundle()
+            val frag = SearchFragment()
+            val args = Bundle()
             args.putString(QUERY_TEXT_KEY, query)
             frag.arguments = args
             return frag
@@ -53,7 +53,7 @@ class SearchFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
         mViewModel = ViewModelProviders.of(this)
                 .get(SearchViewModel::class.java)
 
-        var query = arguments?.getString(QUERY_TEXT_KEY)
+        val query = arguments?.getString(QUERY_TEXT_KEY)
         mViewModel.currentQuery = query
 
         initializeRecyclerView()
@@ -62,15 +62,21 @@ class SearchFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
         return binding.root
     }
 
+    private fun initializeRecyclerView() {
+
+        binding.recyclerView.setHasFixedSize(true)
+        binding.recyclerView.layoutManager = GridLayoutManager(this.context, 2, GridLayoutManager.VERTICAL, false)
+
+    }
+
 
     private fun setupObserversForViewModel() {
 
         val listInfoObserver = Observer<ListInfo> { info ->
-            Log.d("MoviesApp", "listInfo observed \n ${info.toString()}")
             listInfo = info
 
             if(listInfo !=null){
-                var totalResults = listInfo!!.totalResults
+                val totalResults = listInfo?.totalResults
                 if (totalResults!! < 4) {
                     notifyAllResultsDisplay(totalResults)
                 }
@@ -83,35 +89,15 @@ class SearchFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
 
         val moviesObserver = Observer<List<Movie>> { newBatch ->
 
-
             when {
                 adapter == null -> {
-                    Log.i("MoviesApp", "when 1")
-
-                    moviesData.clear()
-                    newBatch?.toMutableList()?.let { moviesData.addAll(it) }
-                    adapter = MoviesAdapter(binding.recyclerView, this.activity, moviesData, this)
-                    binding.recyclerView.adapter = adapter
-                    adapter?.setLoadMoreListener(this@SearchFragment)
+                    initializeAdapter(newBatch)
                 }
                 listInfo?.page != null && ((listInfo?.page)!! > 1) -> {
-                    Log.i("MoviesApp", "when 2")
-
-                    moviesData.removeAt(moviesData.size - 1)
-
-                    newBatch?.size?.let {
-                        adapter?.removeLoadingItem(it)
-                        moviesData.clear()
-                        moviesData.addAll(newBatch.toMutableList())
-                        adapter?.addNewMovies(listInfo?.page!!)
-                    }
-
+                    appendNewData(newBatch)
                 }
                 else -> {
-                    Log.i("MoviesApp", "when else")
-                    moviesData.clear()
-                    newBatch?.toMutableList()?.let { moviesData.addAll(it) }
-                    adapter?.notifyDataSetChanged()
+                    propagateInitialData(newBatch)
                 }
             }
 
@@ -123,12 +109,33 @@ class SearchFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
     }
 
 
-    private fun initializeRecyclerView() {
 
-        binding.recyclerView.setHasFixedSize(true)
-        binding.recyclerView.layoutManager = GridLayoutManager(this.context, 2, GridLayoutManager.VERTICAL, false)
-
+    private fun initializeAdapter(newBatch: List<Movie>?) {
+        moviesData.clear()
+        newBatch?.toMutableList()?.let { moviesData.addAll(it) }
+        adapter = MoviesAdapter(binding.recyclerView, this.activity, moviesData, this)
+        binding.recyclerView.adapter = adapter
+        adapter?.setLoadMoreListener(this@SearchFragment)
     }
+
+    private fun appendNewData(newBatch: List<Movie>?) {
+        moviesData.removeAt(moviesData.size - 1)
+
+        newBatch?.size?.let {
+            adapter?.removeLoadingItem(it)
+            moviesData.clear()
+            moviesData.addAll(newBatch.toMutableList())
+            adapter?.addNewMovies(listInfo?.page!!)
+        }
+    }
+
+    private fun propagateInitialData(newBatch: List<Movie>?) {
+        moviesData.clear()
+        newBatch?.toMutableList()?.let { moviesData.addAll(it) }
+        adapter?.notifyDataSetChanged()
+    }
+
+
 
     override fun onLoadMore() {
         if (listInfo != null) {
@@ -138,16 +145,13 @@ class SearchFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
 
 
     private fun loadMore(result: ListInfo) {
-        Log.d("MoviesApp#loadMore", "current MoviesData Size: ${moviesData.size} | currentPage: ${result.page}")
 
         if (moviesData.size < result.totalResults!!) {
             recycler_view.post {
                 moviesData.add(null)
                 adapter?.notifyItemInserted(moviesData.size - 1)
 
-                var newPage = result.page?.plus(1)!!
-                Log.d("MoviesApp#loadMore", "newPage: $newPage")
-
+                val newPage = result.page?.plus(1)!!
                 loadMovies(newPage)
             }
 
@@ -159,7 +163,7 @@ class SearchFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
 
     private fun notifyAllResultsDisplay(totalResults: Int?) {
         if (totalResults != null) {
-            var snackbar = Snackbar.make(binding.recyclerView, "That's all we can find ($totalResults movies)", Snackbar.LENGTH_LONG)
+            val snackbar = Snackbar.make(binding.recyclerView, "That's all we can find ($totalResults movies)", Snackbar.LENGTH_LONG)
             snackbar.setAction(getString(R.string.OK)) { snackbar.dismiss() }
             snackbar.show()
         }
@@ -176,7 +180,6 @@ class SearchFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
     }
 
     override fun onClick(movie: Movie) {
-        Log.d("MoviesApp", movie.toString())
         (this.activity as MainActivity).showMovie(movie)
     }
 
