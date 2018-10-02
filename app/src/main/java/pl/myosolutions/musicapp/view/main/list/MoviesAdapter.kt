@@ -31,8 +31,6 @@ const val LOADING_TYPE: Int = 1
 class MoviesAdapter(recyclerView: RecyclerView, private var activity: FragmentActivity?, private var items: List<Movie?>?, private val clickCallback: MovieClickCallback) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
 
-
-
     internal var loadMoreListener: ILoadMore? = null
     internal var isLoading: Boolean = false
     internal var visibleThreshold = 6
@@ -78,7 +76,7 @@ class MoviesAdapter(recyclerView: RecyclerView, private var activity: FragmentAc
                             parent, false)
             binding.callback = clickCallback
             MovieItemViewHolder(binding)
-        } else  {
+        } else {
             val view = LayoutInflater.from(activity).inflate(R.layout.loading_layout, parent, false)
             LoadingViewHolder(view)
         }
@@ -99,18 +97,15 @@ class MoviesAdapter(recyclerView: RecyclerView, private var activity: FragmentAc
             val item = items?.get(position) as Movie
             holder.binding.movie = item
 
-            if(!item.poster_path.isNullOrBlank()){
-                val url = POSTER_URL + item.poster_path
+            val url = POSTER_URL + item.poster_path
 
-                GlideApp.with(activity)
+            GlideApp.with(activity)
 
-                        .load(url)
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .placeholder(R.color.grey_dark)
-                        .transition(DrawableTransitionOptions.withCrossFade(500))
-                        .into(holder.binding.itemBackground)
-            }
-
+                    .load(url)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .placeholder(R.color.grey_dark)
+                    .transition(DrawableTransitionOptions.withCrossFade(500))
+                    .into(holder.binding.itemBackground)
 
 
         } else if (holder is LoadingViewHolder) {
