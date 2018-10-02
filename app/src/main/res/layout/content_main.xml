@@ -11,6 +11,7 @@
     <FrameLayout
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
+        android:background="@color/grey_dark"
         android:layout_height="match_parent"></FrameLayout>
 
 </android.support.constraint.ConstraintLayout>

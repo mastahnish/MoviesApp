@@ -5,9 +5,7 @@ import android.os.Bundle
 import android.support.v4.app.FragmentManager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.SearchView
-import android.util.Log
 import android.view.Menu
-import android.view.MenuItem
 import kotlinx.android.synthetic.main.activity_main.*
 import pl.myosolutions.musicapp.R
 import pl.myosolutions.musicapp.model.Movie
@@ -45,9 +43,7 @@ class MainActivity : AppCompatActivity() {
         var menuItem = menu.findItem(R.id.action_search)
 
         (menuItem.actionView as SearchView).apply {
-
             this.setOnQueryTextListener(queryTextListener)
-            setIconifiedByDefault(false)
         }
 
         return super.onCreateOptionsMenu(menu)

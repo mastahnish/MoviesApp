@@ -89,10 +89,10 @@ class SearchFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
                     Log.i("MoviesApp", "when 1")
 
                     moviesData.clear()
-                    moviesData.addAll(newBatch!!.toMutableList())
+                    newBatch?.toMutableList()?.let { moviesData.addAll(it) }
                     adapter = MoviesAdapter(binding.recyclerView, this.activity, moviesData, this)
                     binding.recyclerView.adapter = adapter
-                    adapter!!.setLoadMoreListener(this@SearchFragment)
+                    adapter?.setLoadMoreListener(this@SearchFragment)
                 }
                 listInfo?.page != null && ((listInfo?.page)!! > 1) -> {
                     Log.i("MoviesApp", "when 2")
@@ -100,18 +100,18 @@ class SearchFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
                     moviesData.removeAt(moviesData.size - 1)
 
                     newBatch?.size?.let {
-                        adapter!!.removeLoadingItem(it)
+                        adapter?.removeLoadingItem(it)
                         moviesData.clear()
-                        moviesData.addAll(newBatch!!.toMutableList())
-                        adapter!!.addNewMovies(listInfo?.page!!)
+                        moviesData.addAll(newBatch.toMutableList())
+                        adapter?.addNewMovies(listInfo?.page!!)
                     }
 
                 }
                 else -> {
                     Log.i("MoviesApp", "when else")
                     moviesData.clear()
-                    moviesData.addAll(newBatch!!.toMutableList())
-                    adapter!!.notifyDataSetChanged()
+                    newBatch?.toMutableList()?.let { moviesData.addAll(it) }
+                    adapter?.notifyDataSetChanged()
                 }
             }
 
@@ -143,7 +143,7 @@ class SearchFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
         if (moviesData.size < result.totalResults!!) {
             recycler_view.post {
                 moviesData.add(null)
-                adapter!!.notifyItemInserted(moviesData.size - 1)
+                adapter?.notifyItemInserted(moviesData.size - 1)
 
                 var newPage = result.page?.plus(1)!!
                 Log.d("MoviesApp#loadMore", "newPage: $newPage")

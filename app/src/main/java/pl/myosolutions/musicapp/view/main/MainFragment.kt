@@ -21,7 +21,7 @@ import pl.myosolutions.musicapp.view.main.list.MoviesAdapter
 import pl.myosolutions.musicapp.viewmodel.MainViewModel
 import java.util.*
 
-class MainFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback{
+class MainFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
 
     var moviesData: MutableList<Movie?> = ArrayList()
     var listInfo: ListInfo? = null
@@ -29,7 +29,6 @@ class MainFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback{
 
     private lateinit var binding: FragmentMainBinding
     private lateinit var mViewModel: MainViewModel
-
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -66,10 +65,11 @@ class MainFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback{
                     Log.i("MoviesApp", "when 1")
 
                     moviesData.clear()
-                    moviesData.addAll(newBatch!!.toMutableList())
+                    newBatch?.toMutableList()?.let { moviesData.addAll(it) }
+
                     adapter = MoviesAdapter(binding.recyclerView, this.activity, moviesData, this)
                     binding.recyclerView.adapter = adapter
-                    adapter!!.setLoadMoreListener(this@MainFragment)
+                    adapter?.setLoadMoreListener(this@MainFragment)
 
                 }
                 listInfo?.page != null && ((listInfo?.page)!! > 1) -> {
@@ -78,18 +78,19 @@ class MainFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback{
                     moviesData.removeAt(moviesData.size - 1)
 
                     newBatch?.size?.let {
-                        adapter!!.removeLoadingItem(it)
+                        adapter ?. removeLoadingItem (it)
                         moviesData.clear()
-                        moviesData.addAll(newBatch!!.toMutableList())
-                        adapter!!.addNewMovies(listInfo?.page!!)
+                        moviesData.addAll(newBatch.toMutableList())
+                        adapter?.addNewMovies(listInfo?.page!!)
                     }
 
                 }
                 else -> {
                     Log.i("MoviesApp", "when else")
                     moviesData.clear()
-                    moviesData.addAll(newBatch!!.toMutableList())
-                    adapter!!.notifyDataSetChanged()
+                    newBatch?.toMutableList()?.let { moviesData.addAll(it) }
+
+                    adapter?.notifyDataSetChanged()
                 }
             }
 

@@ -74,6 +74,7 @@ class SearchViewModel(application: Application)
     }
 
 
+
     private fun loadFromLocalDb(){
         movies = movieRepository!!.allMovies
         listInfo = listInfoRepository!!.listInfo
