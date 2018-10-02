@@ -22,8 +22,8 @@ class MainViewModel(application: Application)
 
 
     private var context: Context = application.applicationContext
-    private var movieRepository: MovieRepository?
-    private var listInfoRepository: ListInfoRepository?
+    private var movieRepository: MovieRepository
+    private var listInfoRepository: ListInfoRepository
     var movies: LiveData<List<Movie>>
     var listInfo: LiveData<ListInfo>
     private var compositeDisposable: CompositeDisposable = CompositeDisposable()
@@ -37,11 +37,11 @@ class MainViewModel(application: Application)
         var movieDatabase: MovieDatabase = MovieDatabase.getInstance(context)
         movieRepository = MovieRepository.getInstance(MoviesDataSource.getInstance(movieDatabase.movieDAO()))
         listInfoRepository = ListInfoRepository.getInstance(ListInfoDataSource.getInstance(movieDatabase.listInfoDAO()))
-        movieRepository!!.deleteAll()
-        listInfoRepository!!.deletInfo()
+        movieRepository.deleteAll()
+        listInfoRepository.deletInfo()
 
-        movies = movieRepository!!.allMovies
-        listInfo = listInfoRepository!!.listInfo
+        movies = movieRepository.allMovies
+        listInfo = listInfoRepository.listInfo
 
     }
 
@@ -72,8 +72,8 @@ class MainViewModel(application: Application)
 
 
      private fun loadFromLocalDb(){
-        movies = movieRepository!!.allMovies
-        listInfo = listInfoRepository!!.listInfo
+        movies = movieRepository.allMovies
+        listInfo = listInfoRepository.listInfo
      }
 
 
@@ -86,11 +86,11 @@ class MainViewModel(application: Application)
     }
 
     private fun insertInfo(info: ListInfo) {
-        listInfoRepository!!.insertInfo(info)
+        listInfoRepository.insertInfo(info)
     }
 
     private fun insertMovies(movies: List<Movie>) {
-        movieRepository!!.insertAll(movies)
+        movieRepository.insertAll(movies)
 
     }
 

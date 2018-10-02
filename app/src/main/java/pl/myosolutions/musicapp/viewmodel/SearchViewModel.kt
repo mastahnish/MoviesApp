@@ -21,8 +21,8 @@ class SearchViewModel(application: Application)
 
 
     private var context: Context = application.applicationContext
-    private var movieRepository: MovieRepository?
-    private var listInfoRepository: ListInfoRepository?
+    private var movieRepository: MovieRepository
+    private var listInfoRepository: ListInfoRepository
     var movies: LiveData<List<Movie>>
     var listInfo: LiveData<ListInfo>
     var currentQuery: String? = ""
@@ -37,8 +37,8 @@ class SearchViewModel(application: Application)
         var movieDatabase: MovieDatabase = MovieDatabase.getInstance(context)
         movieRepository = MovieRepository.getInstance(MoviesDataSource.getInstance(movieDatabase.movieDAO()))
         listInfoRepository = ListInfoRepository.getInstance(ListInfoDataSource.getInstance(movieDatabase.listInfoDAO()))
-        movieRepository!!.deleteAll()
-        listInfoRepository!!.deletInfo()
+        movieRepository.deleteAll()
+        listInfoRepository.deletInfo()
 
         movies = movieRepository!!.allMovies
         listInfo = listInfoRepository!!.listInfo
@@ -52,7 +52,7 @@ class SearchViewModel(application: Application)
     private fun loadFromExternalServer(page: Int) {
 
         if(page == 1){
-            movieRepository!!.deleteAll()
+            movieRepository.deleteAll()
         }
 
         val disposable = movieApiService.getSearchResults(MoviesAPI.API_KEY, currentQuery, page)
@@ -76,8 +76,8 @@ class SearchViewModel(application: Application)
 
 
     private fun loadFromLocalDb(){
-        movies = movieRepository!!.allMovies
-        listInfo = listInfoRepository!!.listInfo
+        movies = movieRepository.allMovies
+        listInfo = listInfoRepository.listInfo
     }
 
 
@@ -90,11 +90,11 @@ class SearchViewModel(application: Application)
     }
 
     private fun insertInfo(info: ListInfo) {
-        listInfoRepository!!.insertInfo(info)
+        listInfoRepository.insertInfo(info)
     }
 
     private fun insertMovies(movies: List<Movie>) {
-        movieRepository!!.insertAll(movies)
+        movieRepository.insertAll(movies)
 
     }
 

@@ -18,14 +18,13 @@ class DetailsViewModel(application: Application)
     : AndroidViewModel(application) {
 
 
-    private var context: Context
+    private var context: Context = application.applicationContext
     private var movieRepository: MovieRepository?
     var currentMovie: MutableLiveData<Movie>? = MutableLiveData()
     private var compositeDisposable: CompositeDisposable = CompositeDisposable()
 
 
     init{
-        context = application.applicationContext
         var movieDatabase: MovieDatabase = MovieDatabase.getInstance(context)
         movieRepository = MovieRepository.getInstance(MoviesDataSource.getInstance(movieDatabase.movieDAO()))
     }
