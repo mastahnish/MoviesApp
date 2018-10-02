@@ -43,7 +43,6 @@ class MainActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.menu_main, menu)
 
         var menuItem = menu.findItem(R.id.action_search)
-        menuItem.setOnActionExpandListener(actionExpandListener)
 
         (menuItem.actionView as SearchView).apply {
 
@@ -75,47 +74,7 @@ class MainActivity : AppCompatActivity() {
                         .commit()
             }
 
-       /*     newText?.isNotEmpty().let {
-
-                val fragment = SearchFragment.getInstance(newText)
-
-                var searchTag = SearchFragment::class.java.simpleName
-                fragmentManager.beginTransaction()
-                        .replace(R.id.fragment_container, fragment, searchTag)
-                        .commit()
-
-                 if (fragmentManager.findFragmentByTag(searchTag)?.isVisible ?: false) {
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.fragment_container, fragment, searchTag)
-                            .commit()
-                } else {
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.fragment_container, fragment, searchTag)
-//                            .addToBackStack("${MainFragment::class.java.simpleName} to $searchTag")
-                            .commit()
-                }
-
-            }*/
-
-
             return true
         }
-    }
-
-    private var actionExpandListener = object : MenuItem.OnActionExpandListener {
-        override fun onMenuItemActionExpand(p0: MenuItem?): Boolean {
-            Log.d("MoviesApp", "onMenuItemActionExpand")
-            return true
-        }
-
-        override fun onMenuItemActionCollapse(p0: MenuItem?): Boolean {
-            Log.d("MoviesApp", "onMenuItemActionCollapse")
-            fragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container,  MainFragment(), MainFragment::class.java.simpleName)
-                    .commit()
-            return true
-        }
-
-
     }
 }

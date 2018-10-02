@@ -2,7 +2,7 @@ package pl.myosolutions.musicapp.view.main.list
 
 import android.databinding.DataBindingUtil
 import android.support.v4.app.FragmentActivity
-import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -25,20 +25,23 @@ internal class MovieItemViewHolder(itemViewBinding: MovieItemLayoutBinding) : Re
     var binding = itemViewBinding
 }
 
-class MoviesAdapter(recyclerView: RecyclerView, var activity: FragmentActivity?, private var items: List<Movie?>?, private val clickCallback: MovieClickCallback) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+const val MOVIE_TYPE: Int = 0
+const val LOADING_TYPE: Int = 1
 
-    private val VIEW_TYPE_ITEM: Int = 0
-    private val VIEW_TYPE_LOADING: Int = 1
+class MoviesAdapter(recyclerView: RecyclerView, private var activity: FragmentActivity?, private var items: List<Movie?>?, private val clickCallback: MovieClickCallback) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+
+
 
     internal var loadMoreListener: ILoadMore? = null
     internal var isLoading: Boolean = false
-    internal var visibleThreshold = 1
+    internal var visibleThreshold = 6
     internal var lastVisibleItem: Int = 0
     internal var totalItemCount: Int = 0
 
 
     init {
-        val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
+        val linearLayoutManager = recyclerView.layoutManager as GridLayoutManager
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
@@ -53,10 +56,23 @@ class MoviesAdapter(recyclerView: RecyclerView, var activity: FragmentActivity?,
                 }
             }
         })
+
+        linearLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+            override fun getSpanSize(position: Int): Int {
+
+                return when (getItemViewType(position)) {
+                    MOVIE_TYPE -> 1
+                    LOADING_TYPE -> 2
+                    else -> -1
+                }
+            }
+        }
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return if (viewType == VIEW_TYPE_ITEM) {
+
+        return if (viewType == MOVIE_TYPE) {
             val binding = DataBindingUtil
                     .inflate<MovieItemLayoutBinding>(LayoutInflater.from(parent.context), R.layout.movie_item_layout,
                             parent, false)
@@ -70,7 +86,7 @@ class MoviesAdapter(recyclerView: RecyclerView, var activity: FragmentActivity?,
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (items?.get(position) == null) VIEW_TYPE_LOADING else VIEW_TYPE_ITEM
+        return if (items?.get(position) == null) LOADING_TYPE else MOVIE_TYPE
     }
 
     override fun getItemCount(): Int {
@@ -81,25 +97,29 @@ class MoviesAdapter(recyclerView: RecyclerView, var activity: FragmentActivity?,
         if (holder is MovieItemViewHolder) {
 
             val item = items?.get(position) as Movie
-            val url = POSTER_URL + item.poster_path
-
             holder.binding.movie = item
 
-            GlideApp.with(activity)
+            if(!item.poster_path.isNullOrBlank()){
+                val url = POSTER_URL + item.poster_path
 
-                    .load(url)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .transition(DrawableTransitionOptions.withCrossFade(500))
-                    .into(holder.binding.itemBackground)
+                GlideApp.with(activity)
+
+                        .load(url)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .placeholder(R.color.grey_dark)
+                        .transition(DrawableTransitionOptions.withCrossFade(500))
+                        .into(holder.binding.itemBackground)
+            }
+
+
 
         } else if (holder is LoadingViewHolder) {
-
             holder.progressBar.isIndeterminate = true
         }
     }
 
 
-    fun setLoaded() {
+    private fun setLoaded() {
         isLoading = false
     }
 
@@ -107,9 +127,9 @@ class MoviesAdapter(recyclerView: RecyclerView, var activity: FragmentActivity?,
         this.loadMoreListener = iLoadMore
     }
 
-    fun removeLoadingItem(size: Int) {
+    fun removeLoadingItem(newBatchSize: Int) {
         notifyItemRemoved(items!!.size)
-        notifyItemRangeChanged(items!!.size, size)
+        notifyItemRangeChanged(items!!.size, newBatchSize)
     }
 
     fun addNewMovies(page: Int) {

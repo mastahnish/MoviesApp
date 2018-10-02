@@ -14,13 +14,16 @@
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/grey_dark"
         android:onClick="@{() ->  callback.onClick(movie)}">
 
 
         <ImageView
+            android:src="@drawable/no_poster"
             android:id="@+id/item_background"
+            android:adjustViewBounds="true"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent" />
 
 
     </android.support.constraint.ConstraintLayout>

@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import kotlinx.android.synthetic.main.fragment_main.*
 import pl.myosolutions.musicapp.R
 import pl.myosolutions.musicapp.databinding.FragmentSearchBinding
 import pl.myosolutions.musicapp.model.ListInfo
@@ -37,9 +38,9 @@ class SearchFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
         }
     }
 
-    var moviesData: MutableList<Movie?> = ArrayList()
-    var listInfo: ListInfo? = null
-    var adapter: MoviesAdapter? = null
+    private var moviesData: MutableList<Movie?> = ArrayList()
+    private var listInfo: ListInfo? = null
+    private var adapter: MoviesAdapter? = null
 
     private lateinit var mViewModel: SearchViewModel
     private lateinit var binding: FragmentSearchBinding
@@ -80,7 +81,7 @@ class SearchFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
         mViewModel.listInfo.observe(this, listInfoObserver)
 
 
-        val moviesObserver = Observer<List<Movie>> { movies ->
+        val moviesObserver = Observer<List<Movie>> { newBatch ->
 
 
             when {
@@ -88,7 +89,7 @@ class SearchFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
                     Log.i("MoviesApp", "when 1")
 
                     moviesData.clear()
-                    moviesData.addAll(movies!!.toMutableList())
+                    moviesData.addAll(newBatch!!.toMutableList())
                     adapter = MoviesAdapter(binding.recyclerView, this.activity, moviesData, this)
                     binding.recyclerView.adapter = adapter
                     adapter!!.setLoadMoreListener(this@SearchFragment)
@@ -98,10 +99,10 @@ class SearchFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
 
                     moviesData.removeAt(moviesData.size - 1)
 
-                    movies?.size?.let {
+                    newBatch?.size?.let {
                         adapter!!.removeLoadingItem(it)
                         moviesData.clear()
-                        moviesData.addAll(movies!!.toMutableList())
+                        moviesData.addAll(newBatch!!.toMutableList())
                         adapter!!.addNewMovies(listInfo?.page!!)
                     }
 
@@ -109,7 +110,7 @@ class SearchFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
                 else -> {
                     Log.i("MoviesApp", "when else")
                     moviesData.clear()
-                    moviesData.addAll(movies!!.toMutableList())
+                    moviesData.addAll(newBatch!!.toMutableList())
                     adapter!!.notifyDataSetChanged()
                 }
             }
@@ -140,13 +141,15 @@ class SearchFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
         Log.d("MoviesApp#loadMore", "current MoviesData Size: ${moviesData.size} | currentPage: ${result.page}")
 
         if (moviesData.size < result.totalResults!!) {
-            moviesData.add(null)
-            adapter!!.notifyItemInserted(moviesData.size - 1)
+            recycler_view.post {
+                moviesData.add(null)
+                adapter!!.notifyItemInserted(moviesData.size - 1)
 
-            var newPage = result.page?.plus(1)!!
-            Log.d("MoviesApp#loadMore", "newPage: $newPage")
+                var newPage = result.page?.plus(1)!!
+                Log.d("MoviesApp#loadMore", "newPage: $newPage")
 
-            loadMovies(newPage)
+                loadMovies(newPage)
+            }
 
         } else {
 
@@ -160,7 +163,6 @@ class SearchFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback {
             snackbar.setAction(getString(R.string.OK)) { snackbar.dismiss() }
             snackbar.show()
         }
-
     }
 
 
