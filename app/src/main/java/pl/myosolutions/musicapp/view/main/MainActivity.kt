@@ -42,14 +42,12 @@ class MainActivity : AppCompatActivity() {
 
         menuInflater.inflate(R.menu.menu_main, menu)
 
-        // Get the SearchView and set the searchable configuration
         var menuItem = menu.findItem(R.id.action_search)
         menuItem.setOnActionExpandListener(actionExpandListener)
 
         (menuItem.actionView as SearchView).apply {
 
             this.setOnQueryTextListener(queryTextListener)
-
             setIconifiedByDefault(false)
         }
 

@@ -21,6 +21,7 @@ object MoviesAPI {
     const val BACKDROP_URL: String = "$IMAGE_DOMAIN/w780"
     const val API_FIELD_KEY: String = "api_key"
     const val PAGE_FIELD_KEY: String = "page"
+    const val QUERY_FIELD_KEY: String = "query"
 
     interface MovieService {
 
@@ -28,7 +29,7 @@ object MoviesAPI {
         fun getMovies(@Query(API_FIELD_KEY) apiKey: String, @Query(PAGE_FIELD_KEY) page: Int): Flowable<MovieResponse>
 
         @GET("/3/search/movie/")
-        fun getSearchResults(@Query(API_FIELD_KEY) apiKey: String, @Query(PAGE_FIELD_KEY) page: Int): Flowable<MovieResponse>
+        fun getSearchResults(@Query(API_FIELD_KEY) apiKey: String, @Query(QUERY_FIELD_KEY) query: String?, @Query(PAGE_FIELD_KEY) page: Int): Flowable<MovieResponse>
 
         companion object {
             fun create(): MovieService {
