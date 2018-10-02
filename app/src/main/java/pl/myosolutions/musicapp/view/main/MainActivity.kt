@@ -1,18 +1,18 @@
 package pl.myosolutions.musicapp.view.main
 
 
-import android.app.SearchManager
-import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.FragmentManager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.SearchView
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import kotlinx.android.synthetic.main.activity_main.*
 import pl.myosolutions.musicapp.R
 import pl.myosolutions.musicapp.model.Movie
 import pl.myosolutions.musicapp.view.details.DetailsActivity
+import pl.myosolutions.musicapp.view.search.SearchFragment
 
 
 class MainActivity : AppCompatActivity() {
@@ -28,7 +28,8 @@ class MainActivity : AppCompatActivity() {
         fragmentManager
                 .beginTransaction()
                 .add(R.id.fragment_container,
-                        MainFragment(), MainFragment::class.java.simpleName).commit()
+                        MainFragment(), MainFragment::class.java.simpleName)
+                .commit()
 
     }
 
@@ -37,20 +38,86 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
 
         menuInflater.inflate(R.menu.menu_main, menu)
-        var searchItem: MenuItem? = menu.findItem(R.id.action_search)
-        var searchManager: SearchManager = this@MainActivity.getSystemService(Context.SEARCH_SERVICE) as SearchManager
 
-        var searchView: SearchView? = null
-        if (searchItem != null) {
-            searchView = searchItem.actionView as SearchView
+        // Get the SearchView and set the searchable configuration
+        var menuItem = menu.findItem(R.id.action_search)
+        menuItem.setOnActionExpandListener(actionExpandListener)
+
+        (menuItem.actionView as SearchView).apply {
+
+            this.setOnQueryTextListener(queryTextListener)
+
+            setIconifiedByDefault(false)
         }
-        searchView?.setSearchableInfo(searchManager.getSearchableInfo(this@MainActivity.componentName))
-
 
         return super.onCreateOptionsMenu(menu)
+    }
+
+
+    private var queryTextListener = object : SearchView.OnQueryTextListener {
+        override fun onQueryTextSubmit(query: String): Boolean {
+
+            return false
+        }
+
+        override fun onQueryTextChange(newText: String): Boolean {
+            if(newText.isNotEmpty()){
+                val fragment = SearchFragment.getInstance(newText)
+
+                var searchTag = SearchFragment::class.java.simpleName
+                fragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, fragment, searchTag)
+                        .commit()
+            }else{
+                fragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container,  MainFragment(), MainFragment::class.java.simpleName)
+                        .commit()
+            }
+
+       /*     newText?.isNotEmpty().let {
+
+                val fragment = SearchFragment.getInstance(newText)
+
+                var searchTag = SearchFragment::class.java.simpleName
+                fragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, fragment, searchTag)
+                        .commit()
+
+                 if (fragmentManager.findFragmentByTag(searchTag)?.isVisible ?: false) {
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.fragment_container, fragment, searchTag)
+                            .commit()
+                } else {
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.fragment_container, fragment, searchTag)
+//                            .addToBackStack("${MainFragment::class.java.simpleName} to $searchTag")
+                            .commit()
+                }
+
+            }*/
+
+
+            return true
+        }
+    }
+
+    private var actionExpandListener = object : MenuItem.OnActionExpandListener {
+        override fun onMenuItemActionExpand(p0: MenuItem?): Boolean {
+            Log.d("MoviesApp", "onMenuItemActionExpand")
+            return true
+        }
+
+        override fun onMenuItemActionCollapse(p0: MenuItem?): Boolean {
+            Log.d("MoviesApp", "onMenuItemActionCollapse")
+            fragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container,  MainFragment(), MainFragment::class.java.simpleName)
+                    .commit()
+            return true
+        }
+
+
     }
 }

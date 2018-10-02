@@ -26,7 +26,7 @@ class MainFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback{
     var listInfo: ListInfo? = null
     var adapter: MoviesAdapter? = null
 
-    lateinit var binding: FragmentMainBinding
+    private lateinit var binding: FragmentMainBinding
     private lateinit var mViewModel: MainViewModel
 
 
@@ -109,7 +109,9 @@ class MainFragment : Fragment(), ILoadMore, MoviesAdapter.MovieClickCallback{
 
 
     override fun onLoadMore() {
-        loadMore(listInfo!!)
+        if(listInfo!=null){
+            loadMore(listInfo!!)
+        }
     }
 
 

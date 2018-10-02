@@ -21,7 +21,7 @@ class MainViewModel(application: Application)
     : AndroidViewModel(application) {
 
 
-    private var context: Context
+    private var context: Context = application.applicationContext
     private var movieRepository: MovieRepository?
     private var listInfoRepository: ListInfoRepository?
     var movies: LiveData<List<Movie>>
@@ -34,7 +34,6 @@ class MainViewModel(application: Application)
 
 
     init{
-        context = application.applicationContext
         var movieDatabase: MovieDatabase = MovieDatabase.getInstance(context)
         movieRepository = MovieRepository.getInstance(MoviesDataSource.getInstance(movieDatabase.movieDAO()))
         listInfoRepository = ListInfoRepository.getInstance(ListInfoDataSource.getInstance(movieDatabase.listInfoDAO()))

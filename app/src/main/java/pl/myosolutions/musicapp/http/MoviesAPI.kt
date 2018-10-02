@@ -2,6 +2,7 @@ package pl.myosolutions.musicapp.http
 
 import com.google.gson.GsonBuilder
 import io.reactivex.Flowable
+import pl.myosolutions.musicapp.BuildConfig
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
@@ -9,23 +10,25 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 
-
 object MoviesAPI {
 
 
     var API_BASE_URL: String = "https://api.themoviedb.org/"
-    const val API_KEY: String = "d9eb3dc80a4a233517342f4a6b622e3f"
+    const val API_KEY: String = BuildConfig.Movies_API_Key
 
     private const val IMAGE_DOMAIN: String = "https://image.tmdb.org/t/p"
     const val POSTER_URL: String = "$IMAGE_DOMAIN/w500/"
-    const val POSTER_THUMBNAIL_URL: String = "$IMAGE_DOMAIN/w185/"
     const val BACKDROP_URL: String = "$IMAGE_DOMAIN/w780"
+    const val API_FIELD_KEY: String = "api_key"
+    const val PAGE_FIELD_KEY: String = "page"
 
     interface MovieService {
 
-        @GET("/3/movie/now_playing")
-        fun getMovies(@Query("api_key") apiKey: String, @Query("page") page: Int): Flowable<MovieResponse>
+        @GET("/3/movie/now_playing/")
+        fun getMovies(@Query(API_FIELD_KEY) apiKey: String, @Query(PAGE_FIELD_KEY) page: Int): Flowable<MovieResponse>
 
+        @GET("/3/search/movie/")
+        fun getSearchResults(@Query(API_FIELD_KEY) apiKey: String, @Query(PAGE_FIELD_KEY) page: Int): Flowable<MovieResponse>
 
         companion object {
             fun create(): MovieService {
