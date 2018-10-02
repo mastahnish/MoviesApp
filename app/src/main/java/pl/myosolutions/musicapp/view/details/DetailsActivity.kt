@@ -47,7 +47,7 @@ class DetailsActivity : AppCompatActivity() {
         val moviesObserver = Observer<Movie> { movie ->
             binding.movie = movie
             GlideApp.with(this@DetailsActivity)
-                    .load(MoviesAPI.BACKDROP_URL+ (movie?.backdrop_path ?: null))
+                    .load(MoviesAPI.BACKDROP_URL+ movie?.backdrop_path)
                     .transition(DrawableTransitionOptions.withCrossFade(1000))
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(binding.backgroundImage)
