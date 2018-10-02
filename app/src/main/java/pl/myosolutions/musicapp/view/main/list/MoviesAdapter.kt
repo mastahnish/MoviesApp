@@ -39,13 +39,13 @@ class MoviesAdapter(recyclerView: RecyclerView, private var activity: FragmentAc
 
 
     init {
-        val linearLayoutManager = recyclerView.layoutManager as GridLayoutManager
+        val layoutManager = recyclerView.layoutManager as GridLayoutManager
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
 
-                totalItemCount = linearLayoutManager.itemCount
-                lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition()
+                totalItemCount = layoutManager.itemCount
+                lastVisibleItem = layoutManager.findLastVisibleItemPosition()
                 if (!isLoading && totalItemCount <= lastVisibleItem + visibleThreshold) {
                     if (loadMoreListener != null)
                         loadMoreListener!!.onLoadMore()
@@ -55,7 +55,7 @@ class MoviesAdapter(recyclerView: RecyclerView, private var activity: FragmentAc
             }
         })
 
-        linearLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+        layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
 
                 return when (getItemViewType(position)) {
@@ -100,7 +100,6 @@ class MoviesAdapter(recyclerView: RecyclerView, private var activity: FragmentAc
             val url = POSTER_URL + item.poster_path
 
             GlideApp.with(activity)
-
                     .load(url)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .placeholder(R.color.grey_dark)
